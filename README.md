@@ -1,15 +1,24 @@
 # AIMS — Accounting & Inventory Management System
 
+**Repository:** [github.com/himanshuphulara/aims](https://github.com/himanshuphulara/aims)
+
 Web application for unit accounting, inventory, vouchers, mess operations, and an optional **AI Knowledge** module (document Q&A, surveys, feedback). The stack is **Laravel 11** (`html/`), **MySQL 8**, and a local **Python FastAPI** service (`ai_service/`) backed by **Ollama** for on-prem RAG.
 
+```bash
+git clone https://github.com/himanshuphulara/aims.git
+cd aims
 ```
-latest/
-├── html/                 # Laravel application
+
+```
+aims/
+├── html/                 # Laravel application (document root: html/public)
 ├── ai_service/           # FastAPI RAG + ingestion (port 8001)
 ├── scripts/              # Operational helpers (e.g. safe DB re-import)
 ├── ledgersinfo_html.sql  # Schema + seed data (change passwords after import)
 └── README.md
 ```
+
+**Login:** use **username** (`name` field) and password — not email.
 
 ## Features (high level)
 
@@ -220,7 +229,7 @@ See [`html/.env.example`](html/.env.example).
 After seeding, grant roles these permissions (or use admin user):
 
 - `ai.documents.manage`
-- `ai.ask.use`
+- `ai.ask`
 - `ai.surveys.manage`
 - `ai.feedback.view`
 
@@ -262,4 +271,4 @@ Proprietary / internal use unless otherwise specified by your organization.
 
 ## Author
 
-[Himanshu Phulara](https://github.com/himanshu-phulara)
+[Himanshu Phulara](https://github.com/himanshuphulara)
