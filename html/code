@@ -1,0 +1,191 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Entry;
+
+class EntryController extends Controller
+{
+    // Show the form to enter multiple labels and amounts
+    public function create()
+    {
+        return view('entries.create');
+    }
+
+    // Store the labels and amounts as JSON
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'label' => 'required|array|min:1',
+            'amount' => 'required|array|min:1',
+            'label.*' => 'required|string',
+            'amount.*' => 'required|numeric|min:0.01',
+        ]);
+
+        // Combine label and amount into an array of entries
+        $entries = [];
+        foreach ($validated['label'] as $index => $label) {
+            $entries[] = [
+                'label' => $label,
+                'amount' => $validated['amount'][$index],
+            ];
+        }
+
+        // Store as JSON in the database
+        Entry::create(['data' => $entries]);
+
+        return redirect()->route('entries.index')->with('success', 'Entries saved successfully!');
+    }
+
+    // Show all stored entries
+    public function index()
+    {
+        $entries = Entry::all();
+        return view('entries.index', compact('entries'));
+    }
+
+    // Show the edit form for a specific entry
+    public function edit($id)
+    {
+        $entry = Entry::findOrFail($id);
+        return view('entries.edit', compact('entry'));
+    }
+
+    // Update an existing entry
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'label' => 'required|array|min:1',
+            'amount' => 'required|array|min:1',
+            'label.*' => 'required|string',
+            'amount.*' => 'required|numeric|min:0.01',
+        ]);
+
+        // Find the existing entry
+        $entry = Entry::findOrFail($id);
+
+        // Combine label and amount into an array of entries
+        $entries = [];
+        foreach ($validated['label'] as $index => $label) {
+            $entries[] = [
+                'label' => $label,
+                'amount' => $validated['amount'][$index],
+            ];
+        }
+
+        // Update the existing entry
+        $entry->data = $entries;
+        $entry->save();
+
+        return redirect()->route('entries.index')->with('success', 'Entry updated successfully!');
+    }
+
+    // Delete an entry
+    public function destroy($id)
+    {
+        $entry = Entry::find($id);
+
+        if ($entry) {
+            $entry->delete();
+            return response()->json(['success' => 'Entry deleted successfully']);
+        }
+
+        return response()->json(['error' => 'Entry not found'], 404);
+    }
+}
+
+<!-- resources/views/entries/edit.blade.php -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Entry</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Add a new set of inputs for label and amount
+            $("#addEntryButton").click(function() {
+                var newEntry = `<div class="entry">
+                    <label for="label[]">Label:</label><br>
+                    <input type="text" name="label[]" required><br><br>
+
+                    <label for="amount[]">Amount:</label><br>
+                    <input type="number" name="amount[]" step="0.01" required><br><br>
+
+                    <button type="button" class="deleteButton">Delete</button><br><br>
+                </div>`;
+                $("#entriesContainer").append(newEntry); // Append the new fields
+            });
+
+            // Handle deletion of individual entries
+            $(document).on("click", ".deleteButton", function() {
+                $(this).closest(".entry").remove();  // Remove the specific entry div
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Edit Entry</h1>
+    <form action="{{ route('entries.update', $entry->id) }}" method="POST">
+        @csrf
+        @method('PUT') <!-- Since this is an update, use PUT method -->
+        <div id="entriesContainer">
+            @foreach (json_decode($entry->data) as $data)
+                <div class="entry">
+                    <label for="label[]">Label:</label><br>
+                    <input type="text" name="label[]" value="{{ $data->label }}" required><br><br>
+
+                    <label for="amount[]">Amount:</label><br>
+                    <input type="number" name="amount[]" value="{{ $data->amount }}" step="0.01" required><br><br>
+
+                    <button type="button" class="deleteButton">Delete</button><br><br>
+                </div>
+            @endforeach
+        </div>
+        <button type="button" id="addEntryButton">Add Another Entry</button><br><br>
+        <input type="submit" value="Update Entry">
+    </form>
+</body>
+</html>
+
+----------------------------------------------------------------------
+
+<!-- resources/views/entries/index.blade.php -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stored Entries</title>
+</head>
+<body>
+    <h1>Stored Entries</h1>
+    @foreach ($entries as $entry)
+        <div id="entry-{{ $entry->id }}">
+            <h3>Entry #{{ $entry->id }}</h3>
+            <ul>
+                @foreach (json_decode($entry->data) as $data)
+                    <li>Label: {{ $data->label }}, Amount: {{ $data->amount }}</li>
+                @endforeach
+            </ul>
+            <p>Created at: {{ $entry->created_at }}</p>
+            <!-- Edit link for each entry -->
+            <a href="{{ route('entries.edit', $entry->id) }}">Edit</a>
+            <button class="deleteEntry" data-id="{{ $entry->id }}">Delete</button>
+        </div>
+    @endforeach
+</body>
+</html>
+
+
+
+use App\Http\Controllers\EntryController;
+
+Route::get('/', [EntryController::class, 'create'])->name('entries.create');
+Route::post('/entries', [EntryController::class, 'store'])->name('entries.store');
+Route::get('/entries', [EntryController::class, 'index'])->name('entries.index');
+Route::get('/entries/{id}/edit', [EntryController::class, 'edit'])->name('entries.edit');
+Route::put('/entries/{id}', [EntryController::class, 'update'])->name('entries.update');
+Route::delete('/entries/{id}', [EntryController::class, 'destroy'])->name('entries.destroy');

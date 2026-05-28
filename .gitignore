@@ -1,0 +1,46 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Local-only artifacts (not part of the application)
+backups/
+*.docx
+*.bak
+*_bak
+html/laravel.log
+html/exceldemo
+html/bootstrap/cache1/
+html/public/E__/
+
+# Python AI service runtime data (Chroma index, uploads)
+ai_service/data/
+ai_service/.venv/
+ai_service/__pycache__/
+
+# Laravel (see also html/.gitignore)
+html/vendor/
+html/node_modules/
+html/.env
+html/.env.*
+!html/.env.example
+html/public/hot
+html/public/storage
+html/storage/*.key
+html/storage/logs/*
+!html/storage/logs/.gitignore
+html/storage/framework/cache/data/*
+!html/storage/framework/cache/data/.gitignore
+html/storage/framework/sessions/*
+!html/storage/framework/sessions/.gitignore
+html/storage/framework/views/*
+!html/storage/framework/views/.gitignore
+html/storage/app/ai/*
+!html/storage/app/ai/.gitkeep
+html/storage/app/public/backups/*
+html/bootstrap/cache/*.php
+!html/bootstrap/cache/.gitignore
+html/.phpunit.cache
+html/.phpunit.result.cache

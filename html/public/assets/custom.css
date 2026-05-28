@@ -1,0 +1,18 @@
+legend{font-size: 20px;}
+.table-container {
+    height: 300px; 
+    overflow-y: auto;
+    border: 1px solid #ddd;
+}
+.fixed {
+    position: sticky;
+    left: 0;
+    background-color: white; 
+    z-index: 1; 
+}
+.fixed2 {
+    position: sticky;
+    right: 0;
+    background-color: white; 
+    z-index: 1; 
+}
