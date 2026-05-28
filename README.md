@@ -131,58 +131,117 @@ If `AI_INGEST_SYNC=false` in `.env`, run `php artisan queue:work` in another ter
 
 ## Quick start — Windows (development)
 
-### 1. Install
+### 1. Install prerequisites
+- **PHP 8.2+** (Ensure `openssl`, `mbstring`, `pdo_mysql`, `fileinfo`, `gd` are enabled in `php.ini`).
+- **Composer** (Windows installer).
+- **MySQL 8.0+** (Recommend MySQL Community Server).
+- **Python 3.11** (⚠️ **Crucial**: Use Python 3.11.x. Python 3.12+ does not currently have precompiled binaries for ChromaDB/hnswlib on Windows, which will cause installation failures unless a full C++ compiler is installed).
+- **Ollama for Windows**.
 
-- [PHP 8.2+](https://windows.php.net/download/) (add to PATH, enable extensions in `php.ini`)
-- [Composer](https://getcomposer.org/)
-- [MySQL 8](https://dev.mysql.com/downloads/installer/)
-- [Python 3.10+](https://www.python.org/downloads/)
-- [Ollama for Windows](https://ollama.com)
+### 2. Initialize and Start MySQL
+If you installed MySQL manually or the service is not running, open **PowerShell as Administrator** and run:
+```powershell
+# 1. Initialize the data directory (insecure: blank root password)
+& "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe" --initialize-insecure
 
-Optional: set `MYSQLDUMP_PATH` in `.env` if backup cannot find `mysqldump.exe`.
+# 2. Install MySQL as a Windows Service
+& "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe" --install
 
-### 2. Database
-
-Import `ledgersinfo_html.sql` using MySQL Workbench or:
-
-```cmd
-mysql -u root -p -e "CREATE DATABASE ledgersinfo_html CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -u root -p ledgersinfo_html < ledgersinfo_html.sql
+# 3. Start the service
+Start-Service MySQL
 ```
 
-### 3. Laravel
-
+### 3. Database Import
+Import the base schema and sample data:
 ```cmd
-cd html
-copy .env.example .env
-composer install
-php artisan key:generate
-php artisan storage:link
+# Create the database
+"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe" -u root -e "CREATE DATABASE ledgersinfo_html CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# Import sql dump
+"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe" -u root ledgersinfo_html < ledgersinfo_html.sql
 ```
 
-Run the same targeted `migrate` / `db:seed` commands as in the macOS section (Git Bash or PowerShell).
+### 4. Laravel Application Configuration
+1. Navigate to the `html` folder:
+   ```cmd
+   cd html
+   ```
+2. Copy the environment file:
+   ```cmd
+   copy .env.example .env
+   ```
+3. Open `.env` and verify the database configuration:
+   - `DB_DATABASE=ledgersinfo_html`
+   - `DB_USERNAME=root`
+   - `DB_PASSWORD=` (blank if initialized with insecure)
+   - Add `MYSQLDUMP_PATH` using **forward slashes** (to avoid escape issues in PHP Dotenv):
+     ```env
+     MYSQLDUMP_PATH="C:/Program Files/MySQL/MySQL Server 8.4/bin/mysqldump.exe"
+     ```
+   - Update `AI_REQUEST_TIMEOUT` to prevent timeout on model cold-starts:
+     ```env
+     AI_REQUEST_TIMEOUT=180
+     ```
 
-### 4. Run Laravel
+4. Install Composer dependencies:
+   ```cmd
+   composer install
+   ```
 
-Development with upload limits — from `html\public`:
+5. Create missing caches and directories if they do not exist:
+   ```powershell
+   # If bootstrap/cache or storage directories are missing
+   mkdir bootstrap/cache
+   mkdir storage/framework/cache/data
+   mkdir storage/framework/sessions
+   mkdir storage/framework/views
+   mkdir storage/logs
+   ```
 
+6. Generate the app key and link the storage:
+   ```cmd
+   php artisan key:generate
+   php artisan storage:link
+   ```
+
+7. Run the targeted AI migrations & seed the permissions:
+   ```cmd
+   php artisan migrate --path=database/migrations/2026_05_28_200000_add_legacy_columns_to_users_table.php --force
+   php artisan migrate --path=database/migrations/2026_05_28_100000_create_ai_documents_table.php --force
+   php artisan migrate --path=database/migrations/2026_05_28_100100_create_ai_chat_sessions_table.php --force
+   php artisan migrate --path=database/migrations/2026_05_28_100200_create_ai_chat_messages_table.php --force
+   php artisan migrate --path=database/migrations/2026_05_28_100300_create_ai_surveys_table.php --force
+   php artisan migrate --path=database/migrations/2026_05_28_100400_create_ai_survey_questions_table.php --force
+   php artisan migrate --path=database/migrations/2026_05_28_100500_create_ai_survey_responses_table.php --force
+   php artisan db:seed --class=AiPermissionSeeder --force
+   ```
+
+### 5. Run the Laravel Web Server
+From the `html/public` folder, launch the server. Ensure you increase the PHP execution time to handle Ollama model loading times:
 ```cmd
-php -d upload_max_filesize=25M -d post_max_size=30M -S 127.0.0.1:8000 ..\vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php
+cd public
+php -d upload_max_filesize=25M -d post_max_size=30M -d max_execution_time=300 -S 127.0.0.1:8000 ..\vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php
 ```
+Open **[http://127.0.0.1:8000](http://127.0.0.1:8000)** in your browser.
+- **Default login**: Username: `admin` / Password: `Admin@123`
 
-Or use IIS/Apache pointing to `html\public` for production-like testing.
-
-### 5. AI service
-
-```cmd
-ollama pull nomic-embed-text
-ollama pull qwen2.5:7b-instruct
-cd ai_service
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --host 127.0.0.1 --port 8001
-```
+### 6. AI FastAPI Service Setup
+1. Pull the Ollama models (run from command line):
+   ```cmd
+   ollama pull nomic-embed-text
+   ollama pull qwen2.5:7b-instruct
+   ```
+2. Set up the virtual environment using **Python 3.11** in the `ai_service` folder:
+   ```cmd
+   cd ../ai_service
+   python -m venv .venv
+   .venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+3. Run the FastAPI service:
+   ```cmd
+   uvicorn main:app --host 127.0.0.1 --port 8001
+   ```
 
 ---
 
