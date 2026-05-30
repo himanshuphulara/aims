@@ -243,6 +243,28 @@ Open **[http://127.0.0.1:8000](http://127.0.0.1:8000)** in your browser.
    uvicorn main:app --host 127.0.0.1 --port 8001
    ```
 
+### Subsequent Runs (Starting Services After a Restart)
+
+If you have already performed the initial setup and installed all dependencies, you only need to run the services when starting up again:
+
+1. **Start MySQL Service** (if not already running automatically):
+   ```powershell
+   Start-Service MySQL
+   ```
+
+2. **Start the Laravel Web Server**:
+   ```cmd
+   cd html/public
+   php -d upload_max_filesize=25M -d post_max_size=30M -d max_execution_time=300 -S 127.0.0.1:8000 ..\vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php
+   ```
+
+3. **Start the AI Service** (Ensure Ollama application is running first):
+   ```cmd
+   cd ai_service
+   .venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8001
+   ```
+   *(Note: Using `.venv\Scripts\python.exe` directly avoids Windows/PowerShell execution policy restrictions).*
+
 ---
 
 ## Production deployment checklist
@@ -328,6 +350,4 @@ php artisan test --filter=Ai
 
 Proprietary / internal use unless otherwise specified by your organization.
 
-## Author
 
-[Himanshu Phulara](https://github.com/himanshuphulara)
