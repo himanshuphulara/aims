@@ -131,12 +131,45 @@ If `AI_INGEST_SYNC=false` in `.env`, run `php artisan queue:work` in another ter
 
 ## Quick start — Windows (development)
 
-### 1. Install prerequisites
-- **PHP 8.2+** (Ensure `openssl`, `mbstring`, `pdo_mysql`, `fileinfo`, `gd` are enabled in `php.ini`).
-- **Composer** (Windows installer).
-- **MySQL 8.0+** (Recommend MySQL Community Server).
-- **Python 3.11** (⚠️ **Crucial**: Use Python 3.11.x. Python 3.12+ does not currently have precompiled binaries for ChromaDB/hnswlib on Windows, which will cause installation failures unless a full C++ compiler is installed).
-- **Ollama for Windows**.
+### 1. Install Prerequisites (Beginner's Guide)
+
+If you do not have the required software installed, follow these steps to install and configure them:
+
+* **Python 3.11 (⚠️ Crucial Version):**
+  1. Download the installer from the [Python 3.11.9 Release Page](https://www.python.org/downloads/release/python-3119/) (select **Windows installer (64-bit)**).
+  2. Run the installer.
+  3. **IMPORTANT:** Check the box at the bottom that says **"Add python.exe to PATH"** before clicking "Install Now".
+
+* **PHP 8.2 or 8.3:**
+  1. Download the **Thread Safe** Zip file from the [PHP for Windows Download Page](https://windows.php.net/download/).
+  2. Extract the downloaded zip file into a new folder named `C:\php` (so the path is `C:\php\php.exe`).
+  3. Open your Windows Start Menu, search for **"Edit the system environment variables"**, click it, then click **Environment Variables**.
+  4. Under "System variables", double-click **Path**, click **New**, and paste `C:\php`. Click **OK** to save.
+  5. In `C:\php`, make a copy of `php.ini-development` and rename it to `php.ini`.
+  6. Open `php.ini` in a text editor (like Notepad), search for the following lines, and remove the starting semicolon (`;`) to enable them:
+     ```ini
+     extension_dir = "ext"
+     extension=fileinfo
+     extension=gd
+     extension=mbstring
+     extension=openssl
+     extension=pdo_mysql
+     ```
+
+* **Composer:**
+  1. Download the installer from the [Composer Download Page](https://getcomposer.org/download/) (click on **Composer-Setup.exe**).
+  2. Run the installer and choose "Install for all users".
+  3. Point the installer to your PHP executable at `C:\php\php.exe` when prompted, and complete the setup.
+
+* **MySQL 8.0+:**
+  1. Download the installer from [MySQL Community Downloads](https://dev.mysql.com/downloads/installer/).
+  2. Select the **MySQL Installer Web Community** option and run it.
+  3. Choose "Developer Default" or "Server Only" setup, set a password for the `root` user when prompted, and complete the installation.
+
+* **Ollama for Windows:**
+  1. Download the installer from the [Ollama Download Page](https://ollama.com/download/windows).
+  2. Run the installer. It will run in your background system tray automatically.
+
 
 ### 2. Initialize and Start MySQL
 If you installed MySQL manually or the service is not running, open **PowerShell as Administrator** and run:
