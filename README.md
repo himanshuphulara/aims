@@ -133,7 +133,21 @@ If `AI_INGEST_SYNC=false` in `.env`, run `php artisan queue:work` in another ter
 
 ### 1. Install Prerequisites (Beginner's Guide)
 
-If you do not have the required software installed, follow these steps to install and configure them:
+Before installing anything, open a terminal (Command Prompt or PowerShell) and check if the software is already installed:
+
+| Software | Verification Command | Required Version |
+| :--- | :--- | :--- |
+| **Python** | `python --version` (or `py -3.11 --version`) | `Python 3.11.x` (Do not use 3.12+) |
+| **PHP** | `php -v` | `PHP 8.2.x` or `PHP 8.3.x` |
+| **Composer** | `composer -v` | `Composer version 2.x.x` |
+| **MySQL** | `mysql --version` | `mysql  Ver 8.x` |
+| **Ollama** | `ollama --version` | `ollama version is 0.x` |
+
+*If a command prints a version meeting the requirements, you can **skip** that software install! If you get a "not recognized" error, proceed with the installation steps for that software below.*
+
+---
+
+#### Installation Steps (if missing):
 
 * **Python 3.11 (⚠️ Crucial Version):**
   1. Download the installer from the [Python 3.11.9 Release Page](https://www.python.org/downloads/release/python-3119/) (select **Windows installer (64-bit)**).
