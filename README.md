@@ -162,6 +162,13 @@ Import the base schema and sample data:
 ```
 
 ### 4. Laravel Application Configuration
+
+You can automate the Laravel setup (copying `.env`, running composer install, generating keys, and linking storage) on Windows. Navigate to the `html` folder and run:
+```cmd
+setup_laravel_windows.bat
+```
+
+Alternatively, to perform setup manually:
 1. Navigate to the `html` folder:
    ```cmd
    cd html
@@ -243,27 +250,23 @@ Open **[http://127.0.0.1:8000](http://127.0.0.1:8000)** in your browser.
    uvicorn main:app --host 127.0.0.1 --port 8001
    ```
 
-### Subsequent Runs (Starting Services After a Restart)
+### Subsequent Runs (Starting & Stopping Services)
 
-If you have already performed the initial setup and installed all dependencies, you only need to run the services when starting up again:
+If you have already performed the initial setup and installed all dependencies, you can start or stop both the Laravel web server and the AI FastAPI service easily on Windows:
 
-1. **Start MySQL Service** (if not already running automatically):
-   ```powershell
-   Start-Service MySQL
-   ```
+* **To Start:**
+  Open a Command Prompt in the **root** of the repository and run:
+  ```cmd
+  start_aims_windows.bat
+  ```
+  *(This script will perform health diagnostics, automatically launch MySQL/Ollama if they are offline, run missing setups, and start both services in separate console windows).*
 
-2. **Start the Laravel Web Server**:
-   ```cmd
-   cd html/public
-   php -d upload_max_filesize=25M -d post_max_size=30M -d max_execution_time=300 -S 127.0.0.1:8000 ..\vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php
-   ```
-
-3. **Start the AI Service** (Ensure Ollama application is running first):
-   ```cmd
-   cd ai_service
-   .venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8001
-   ```
-   *(Note: Using `.venv\Scripts\python.exe` directly avoids Windows/PowerShell execution policy restrictions).*
+* **To Stop:**
+  Run the cleanup script from the **root** of the repository:
+  ```cmd
+  stop_aims_windows.bat
+  ```
+  *(This will find and terminate the processes running on ports 8000 and 8001, and attempt to stop the MySQL service).*
 
 ---
 

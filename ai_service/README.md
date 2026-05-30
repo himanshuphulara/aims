@@ -9,9 +9,19 @@ This service provides local/offline RAG endpoints for the Laravel AI Knowledge m
 - `POST /ask`
 - `POST /generate-survey`
 
-## Setup (Windows or Linux)
+## Setup (Windows - Automated)
 
-1. Install Python 3.10+
+You can automate the entire setup (checking Python, creating the `.venv`, installing dependencies, and pulling Ollama models) on a fresh Windows machine. Open a command prompt, navigate to the `ai_service` folder, and run:
+
+```cmd
+setup_ai_windows.bat
+```
+
+---
+
+## Setup (Manual - Windows or Linux)
+
+1. Install Python 3.10+ (Python 3.11 recommended for Windows)
 2. Install dependencies:
 
 ```bash
